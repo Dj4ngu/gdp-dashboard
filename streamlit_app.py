@@ -4,8 +4,6 @@ import math
 import random
 import altair as alt
 from pathlib import Path
-import tkinter as tk
-from tkinter import filedialog
 import base64
 import PyPDF2
 
