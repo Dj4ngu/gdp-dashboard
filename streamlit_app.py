@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import math
+import random
 from pathlib import Path
+
+import altair as alt
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
@@ -64,11 +67,11 @@ gdp_df = get_gdp_data()
 
 # Set the title that appears at the top of the page.
 '''
-# :earth_americas: GDP dashboard
+# :earth_americas: Painel do PIB
 
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
+Explore os dados do PIB do site [World Bank Open Data](https://data.worldbank.org/). Como você
+notará, os dados vão apenas até 2022 no momento, e pontos de dados para certos anos frequentemente
+estão ausentes. Mas, fora isso, é uma ótima (e mencionei que é _gratuita_?) fonte de dados.
 '''
 
 # Add some spacing
@@ -115,6 +118,25 @@ st.line_chart(
     y='GDP',
     color='Country Code',
 )
+
+# Adicionar um gráfico de barras com cores aleatórias
+bar_data = filtered_gdp_df.groupby('Country Code', as_index=False)['GDP'].sum()
+
+# Gerar cores aleatórias para cada país
+bar_data['color'] = [
+    f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(len(bar_data))
+]
+
+bar_chart = alt.Chart(bar_data).mark_bar().encode(
+    x=alt.X('Country Code:N', title='Country Code'),
+    y=alt.Y('GDP:Q', title='Total GDP'),
+    color=alt.Color('color:N', scale=None, legend=None)  # Usar cores aleatórias
+).properties(
+    width=700,
+    height=400
+)
+
+st.altair_chart(bar_chart, use_container_width=True)
 
 ''
 ''
