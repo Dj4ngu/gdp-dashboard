@@ -2,9 +2,14 @@ import streamlit as st
 import pandas as pd
 import math
 import random
-from pathlib import Path
-
 import altair as alt
+from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog
+import base64
+import PyPDF2
+
+#streamlit run c:/Projetos-API/StreamLit/gdp-dashboard/streamlit_app.py
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
@@ -171,3 +176,53 @@ for i, country in enumerate(selected_countries):
             delta=growth,
             delta_color=delta_color
         )
+
+
+# # Adicionar um botão para carregar arquivos
+# st.header("Carregar Arquivos", divider="gray")
+
+# uploaded_files = st.file_uploader(
+#     "Selecione os arquivos",
+#     type=None,  # Permite qualquer tipo de arquivo
+#     accept_multiple_files=True  # Permite múltiplos arquivos
+# )
+
+# if uploaded_files:
+#     st.write("Arquivos carregados:")
+#     for uploaded_file in uploaded_files:
+#         st.write(f"- {uploaded_file.name}")
+# else:
+#     st.info("Nenhum arquivo foi carregado.")
+
+    # Adicionar um quadro para carregar e visualizar arquivos PDF
+st.header("Visualizar Arquivo PDF", divider="gray")
+
+uploaded_pdf = st.file_uploader(
+    "Carregue um arquivo PDF",
+    type=["pdf"],  # Restringe o upload apenas para arquivos PDF
+    accept_multiple_files=False  # Apenas um arquivo por vez
+)
+
+if uploaded_pdf:
+    # Exibir o nome do arquivo carregado
+    st.write(f"Arquivo carregado: {uploaded_pdf.name}")
+
+    # Ler o conteúdo do PDF
+    try:
+        pdf_reader = PyPDF2.PdfReader(uploaded_pdf)
+        num_pages = len(pdf_reader.pages)
+        st.write(f"O PDF contém {num_pages} página(s).")
+
+        # Exibir o conteúdo da primeira página como texto
+        first_page = pdf_reader.pages[0]
+        st.text_area("Conteúdo da primeira página:", first_page.extract_text(), height=300)
+
+        # Exibir o PDF diretamente na interface
+        base64_pdf = base64.b64encode(uploaded_pdf.read()).decode("utf-8")
+        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="500" type="application/pdf"></iframe>'
+        st.components.v1.html(pdf_display, height=500)
+        
+    except Exception as e:
+        st.error(f"Erro ao processar o arquivo PDF: {e}")
+else:
+    st.info("Nenhum arquivo PDF foi carregado.")
